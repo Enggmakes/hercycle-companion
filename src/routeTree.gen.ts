@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalendarRouteImport } from './routes/calendar'
+import { Route as HealthRouteImport } from './routes/health'
 import { Route as MoodRouteImport } from './routes/mood'
 import { Route as NotesRouteImport } from './routes/notes'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoodRoute = MoodRouteImport.update({
@@ -38,12 +44,14 @@ const NotesRoute = NotesRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/health': typeof HealthRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/health': typeof HealthRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
+  '/health': typeof HealthRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar' | '/mood' | '/notes'
+  fullPaths: '/' | '/calendar' | '/health' | '/mood' | '/notes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar' | '/mood' | '/notes'
-  id: '__root__' | '/' | '/calendar' | '/mood' | '/notes'
+  to: '/' | '/calendar' | '/health' | '/mood' | '/notes'
+  id: '__root__' | '/' | '/calendar' | '/health' | '/mood' | '/notes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
+  HealthRoute: typeof HealthRoute
   MoodRoute: typeof MoodRoute
   NotesRoute: typeof NotesRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/calendar'
       fullPath: '/calendar'
       preLoaderRoute: typeof CalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mood': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
+  HealthRoute: HealthRoute,
   MoodRoute: MoodRoute,
   NotesRoute: NotesRoute,
 }

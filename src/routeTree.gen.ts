@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as MemoriesRouteImport } from './routes/memories'
 import { Route as MoodRouteImport } from './routes/mood'
 import { Route as NotesRouteImport } from './routes/notes'
 
@@ -30,6 +31,11 @@ const HealthRoute = HealthRouteImport.update({
   path: '/health',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemoriesRoute = MemoriesRouteImport.update({
+  id: '/memories',
+  path: '/memories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MoodRoute = MoodRouteImport.update({
   id: '/mood',
   path: '/mood',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/health': typeof HealthRoute
+  '/memories': typeof MemoriesRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/health': typeof HealthRoute
+  '/memories': typeof MemoriesRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
@@ -60,21 +68,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calendar': typeof CalendarRoute
   '/health': typeof HealthRoute
+  '/memories': typeof MemoriesRoute
   '/mood': typeof MoodRoute
   '/notes': typeof NotesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar' | '/health' | '/mood' | '/notes'
+  fullPaths: '/' | '/calendar' | '/health' | '/memories' | '/mood' | '/notes'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar' | '/health' | '/mood' | '/notes'
-  id: '__root__' | '/' | '/calendar' | '/health' | '/mood' | '/notes'
+  to: '/' | '/calendar' | '/health' | '/memories' | '/mood' | '/notes'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar'
+    | '/health'
+    | '/memories'
+    | '/mood'
+    | '/notes'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalendarRoute: typeof CalendarRoute
   HealthRoute: typeof HealthRoute
+  MemoriesRoute: typeof MemoriesRoute
   MoodRoute: typeof MoodRoute
   NotesRoute: typeof NotesRoute
 }
@@ -102,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/memories': {
+      id: '/memories'
+      path: '/memories'
+      fullPath: '/memories'
+      preLoaderRoute: typeof MemoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mood': {
       id: '/mood'
       path: '/mood'
@@ -123,6 +147,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalendarRoute: CalendarRoute,
   HealthRoute: HealthRoute,
+  MemoriesRoute: MemoriesRoute,
   MoodRoute: MoodRoute,
   NotesRoute: NotesRoute,
 }

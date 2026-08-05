@@ -94,7 +94,7 @@
   --phase-ovulation: oklch(0.78 0.14 85);
   --phase-pms: oklch(0.74 0.15 55);
   --phase-safe: oklch(0.68 0.11 250);
-  --gradient-romance: linear-gradient(135deg, oklch(0.9 0.07 350), oklch(0.89 0.07 300));
+  --gradient-romance: linear-gradient(135deg, oklch(0.68 0.16 355), oklch(0.62 0.14 305));
   --gradient-page:
     radial-gradient(60% 45% at 12% 0%, oklch(0.92 0.07 350 / 75%), transparent 70%),
     radial-gradient(55% 40% at 95% 8%, oklch(0.9 0.07 295 / 70%), transparent 70%),
@@ -140,7 +140,7 @@
   --phase-ovulation: oklch(0.82 0.14 85);
   --phase-pms: oklch(0.78 0.15 55);
   --phase-safe: oklch(0.74 0.12 250);
-  --gradient-romance: linear-gradient(135deg, oklch(0.42 0.1 350), oklch(0.38 0.1 300));
+  --gradient-romance: linear-gradient(135deg, oklch(0.62 0.16 350), oklch(0.55 0.14 305));
   --gradient-page:
     radial-gradient(60% 45% at 12% 0%, oklch(0.42 0.09 350 / 55%), transparent 70%),
     radial-gradient(55% 40% at 95% 8%, oklch(0.38 0.09 295 / 55%), transparent 70%),

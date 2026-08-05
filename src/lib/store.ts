@@ -102,7 +102,8 @@ export function useAppData() {
 
   const update = useCallback((fn: (d: AppData) => AppData) => setData((d) => fn(d)), []);
 
-  const profile = data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0];
+  const profile: Profile =
+    data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0]!;
 
   const updateProfile = useCallback(
     (fn: (p: Profile) => Profile) =>

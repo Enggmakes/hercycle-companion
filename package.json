@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "cross-env NITRO_PRESET=vercel vite build",
+    "build": "npx cross-env NITRO_PRESET=vercel vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -75,6 +75,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
+    "cross-env": "^7.0.3",
     "esbuild": "^0.25.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",

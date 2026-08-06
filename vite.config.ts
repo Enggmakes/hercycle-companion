@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  ssr: {
+    noExternal: ['firebase', '@firebase/app', '@firebase/database', '@firebase/analytics']
+  }
 });

@@ -30,7 +30,7 @@ function NotesPage() {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   if (!ready) return null;
 
-  const entries = Object.entries(profile.notes).sort((a, b) => b[0].localeCompare(a[0]));
+  const entries = Object.entries(profile.notes ?? {}).sort((a, b) => b[0].localeCompare(a[0]));
 
   return (
     <div className="space-y-5">

@@ -1,0 +1,87 @@
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { firebaseConfig } from "./firebase";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+export type AuthUser = {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+};
+
+type AuthCtx = {
+  user: AuthUser | null;
+  authLoading: boolean;
+  signOut: () => Promise<void>;
+};
+
+// ─── Context ─────────────────────────────────────────────────────────────────
+
+const AuthContext = createContext<AuthCtx | null>(null);
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+}
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [signOutFn, setSignOutFn] = useState<() => Promise<void>>(
+    () => async () => {},
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    let unsubscribe: (() => void) | null = null;
+
+    Promise.all([
+      import("firebase/app"),
+      import("firebase/auth"),
+    ]).then(([{ initializeApp, getApps, getApp }, { getAuth, onAuthStateChanged, signOut }]) => {
+      const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      // Expose sign-out so the rest of the app can call it
+      setSignOutFn(() => () => signOut(auth));
+
+      unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+        if (firebaseUser) {
+          setUser({
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName,
+            photoURL: firebaseUser.photoURL,
+          });
+        } else {
+          setUser(null);
+        }
+        setAuthLoading(false);
+      });
+    }).catch((err) => {
+      console.error("[HerCycle] Auth init error:", err);
+      setAuthLoading(false);
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, authLoading, signOut: signOutFn }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}

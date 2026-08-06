@@ -45,7 +45,7 @@ function MoodPage() {
   });
   const counts = MOODS.map((m) => ({
     label: `${m.emoji} ${m.label}`,
-    count: Object.values(profile.moods).filter((v) => v === m.id).length,
+    count: Object.values(profile.moods ?? {}).filter((v) => v === m.id).length,
   }));
 
   return (

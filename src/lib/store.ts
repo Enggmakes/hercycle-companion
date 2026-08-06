@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CycleSettings } from "./cycle";
+import { firebaseConfig } from "./firebase";
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export type MoodId = "happy" | "normal" | "sad" | "cramps" | "irritated" | "tired";
 
@@ -37,7 +40,7 @@ export type AppData = {
   theme: "light" | "dark";
 };
 
-const KEY = "hercycle:data:v1";
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 export const makeProfile = (name = "My love"): Profile => ({
   id: Math.random().toString(36).slice(2),
@@ -65,54 +68,142 @@ export const defaultData = (): AppData => {
   return { profiles: [p], activeId: p.id, pin: null, theme: "light" };
 };
 
-export function loadData(): AppData {
-  if (typeof window === "undefined") return defaultData();
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return defaultData();
-    const parsed = JSON.parse(raw) as AppData;
-    if (!parsed.profiles?.length) return defaultData();
-    return parsed;
-  } catch {
-    return defaultData();
-  }
+/**
+ * Firebase strips empty arrays and objects from stored data.
+ * This fills in missing fields so components never get `undefined`.
+ */
+export function sanitizeProfile(raw: Partial<Profile>): Profile {
+  const base = makeProfile(raw.name ?? "My love");
+  return {
+    ...base,
+    ...raw,
+    id: raw.id ?? base.id,
+    name: raw.name ?? base.name,
+    settings: raw.settings ?? base.settings,
+    moods: raw.moods ?? {},
+    notes: raw.notes ?? {},
+    memories: Array.isArray(raw.memories) ? raw.memories : [],
+    reminders: raw.reminders ?? base.reminders,
+  };
 }
 
-export function saveData(data: AppData) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(KEY, JSON.stringify(data));
+export function sanitizeAppData(raw: Partial<AppData>): AppData {
+  const def = defaultData();
+  const profiles =
+    Array.isArray(raw.profiles) && raw.profiles.length
+      ? (raw.profiles as Partial<Profile>[]).map(sanitizeProfile)
+      : def.profiles;
+  return {
+    profiles,
+    activeId: raw.activeId ?? profiles[0]!.id,
+    pin: raw.pin ?? null,
+    theme: raw.theme ?? "light",
+  };
 }
 
-/** Client-only store hook. `ready` is false until localStorage is read. */
-export function useAppData() {
+// ─── DB path per user ────────────────────────────────────────────────────────
+
+const dbPath = (uid: string) => `users/${uid}/appData`;
+
+// ─── Main store hook ─────────────────────────────────────────────────────────
+
+/**
+ * App store backed by Firebase Realtime Database.
+ * Data is stored privately per user at `users/{uid}/appData`.
+ * Pass the authenticated user's `uid`; pass `null` to skip Firebase (should not happen).
+ */
+export function useAppData(uid: string) {
   const [data, setData] = useState<AppData>(defaultData);
-  const [ready, setReady] = useState(false);
 
+  // Always ready — UI renders immediately with defaults, Firebase updates later
+  const [ready] = useState(true);
+
+  const skipWrite = useRef(false);
+  const writeRef = useRef<((d: AppData) => void) | null>(null);
+
+  // ── Subscribe to Firebase on mount (or when uid changes) ─────────────────
   useEffect(() => {
-    const loaded = loadData();
-    setData(loaded);
-    setReady(true);
+    if (typeof window === "undefined" || !uid) return;
+
+    let unsubscribe: (() => void) | null = null;
+    let active = true;
+
+    // Reset to defaults immediately when the user changes
+    setData(defaultData());
+
+    Promise.all([
+      import("firebase/app"),
+      import("firebase/database"),
+    ]).then(([{ initializeApp, getApps, getApp }, { getDatabase, ref, onValue, set }]) => {
+      if (!active) return;
+
+      const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const path = dbPath(uid);
+
+      writeRef.current = (d: AppData) => {
+        set(ref(db, path), d).catch((err) =>
+          console.warn("[HerCycle] Firebase write failed:", err),
+        );
+      };
+
+      unsubscribe = onValue(
+        ref(db, path),
+        (snapshot) => {
+          if (!active) return;
+          const val = snapshot.val() as AppData | null;
+
+          if (val && val.profiles?.length) {
+            skipWrite.current = true;
+            setData(sanitizeAppData(val));
+          } else if (val === null) {
+            // New user — seed their data
+            writeRef.current?.(defaultData());
+          }
+        },
+        (error) => {
+          console.warn("[HerCycle] Firebase read error:", error.message);
+        },
+      );
+    }).catch((err) => {
+      console.warn("[HerCycle] Firebase unavailable:", err);
+    });
+
+    return () => {
+      active = false;
+      if (unsubscribe) unsubscribe();
+    };
+  }, [uid]);
+
+  // ── Sync theme ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", data.theme === "dark");
+  }, [data.theme]);
+
+  // ── Write to Firebase on local changes ────────────────────────────────────
+  useEffect(() => {
+    if (skipWrite.current) {
+      skipWrite.current = false;
+      return;
+    }
+    writeRef.current?.(data);
+  }, [data]);
+
+  // ─── Updaters ─────────────────────────────────────────────────────────────
+
+  const update = useCallback((fn: (d: AppData) => AppData) => {
+    setData((d) => fn(d));
   }, []);
 
-  useEffect(() => {
-    if (!ready) return;
-    saveData(data);
-    document.documentElement.classList.toggle("dark", data.theme === "dark");
-  }, [data, ready]);
-
-  const update = useCallback((fn: (d: AppData) => AppData) => setData((d) => fn(d)), []);
+  const updateProfile = useCallback((fn: (p: Profile) => Profile) => {
+    setData((d) => ({
+      ...d,
+      profiles: d.profiles.map((p) => (p.id === d.activeId ? fn(p) : p)),
+    }));
+  }, []);
 
   const profile: Profile =
     data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0]!;
-
-  const updateProfile = useCallback(
-    (fn: (p: Profile) => Profile) =>
-      setData((d) => ({
-        ...d,
-        profiles: d.profiles.map((p) => (p.id === d.activeId ? fn(p) : p)),
-      })),
-    [],
-  );
 
   return { data, setData, update, updateProfile, profile, ready };
 }

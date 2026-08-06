@@ -48,7 +48,7 @@ function MemoriesPage() {
     updateProfile((p) => ({
       ...p,
       memories: [
-        ...p.memories,
+        ...(p.memories ?? []),
         { id: Math.random().toString(36).slice(2), title: clean, date, kind },
       ],
     }));
@@ -88,12 +88,12 @@ function MemoriesPage() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2">
-        {profile.memories.length === 0 && (
+        {(profile.memories ?? []).length === 0 && (
           <p className="text-sm text-muted-foreground">
             Nothing saved yet — start with her birthday.
           </p>
         )}
-        {[...profile.memories]
+        {[...(profile.memories ?? [])]
           .sort((a, b) => a.date.localeCompare(b.date))
           .map((m) => (
             <div

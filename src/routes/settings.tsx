@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
-import { Download, LockKeyhole, ShieldCheck, Upload, UserPlus } from "lucide-react";
+import { Download, LockKeyhole, LogOut, ShieldCheck, Upload, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store-context";
+import { useAuth } from "@/lib/auth-context";
 import { makeProfile, type AppData } from "@/lib/store";
 import { cycleDay } from "@/lib/cycle";
 import { Button } from "@/components/ui/button";
@@ -40,12 +41,13 @@ const REMINDERS: { id: string; label: string }[] = [
 
 function SettingsPage() {
   const { data, setData, update, updateProfile, profile, ready } = useStore();
+  const { user, signOut } = useAuth();
   const [pin, setPin] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   if (!ready) return null;
 
   const s = profile.settings;
-  const logged = Object.keys(profile.moods).length;
+  const logged = Object.keys(profile.moods ?? {}).length;
 
   const exportData = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -60,7 +62,7 @@ function SettingsPage() {
   const importData = async (file: File) => {
     try {
       const parsed = JSON.parse(await file.text()) as AppData;
-      if (parsed.profiles?.length) setData(parsed);
+      if (parsed.profiles?.length) update(() => parsed);
     } catch {
       /* ignore malformed backups */
     }
@@ -165,7 +167,7 @@ function SettingsPage() {
           <ShieldCheck className="size-4 text-primary" /> Privacy
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          All data lives in this browser's local storage. No accounts, no cloud upload.
+          Your data is synchronized in real-time across your devices using the cloud.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <Input
@@ -235,8 +237,8 @@ function SettingsPage() {
       <section className="glass p-5">
         <h2 className="text-lg font-semibold">Statistics &amp; backup</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {logged} moods logged · {Object.keys(profile.notes).length} notes ·{" "}
-          {profile.memories.length} memories
+          {logged} moods logged · {Object.keys(profile.notes ?? {}).length} notes ·{" "}
+          {(profile.memories ?? []).length} memories
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button variant="outline" onClick={exportData}>
@@ -255,6 +257,27 @@ function SettingsPage() {
               if (f) void importData(f);
             }}
           />
+        </div>
+      </section>
+
+      <section className="glass p-5">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <LogOut className="size-4 text-primary" /> Account
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Signed in as <strong>{user?.displayName ?? user?.email}</strong>
+        </p>
+        {user?.email && user.displayName && (
+          <p className="text-xs text-muted-foreground">{user.email}</p>
+        )}
+        <div className="mt-4">
+          <Button
+            variant="outline"
+            onClick={() => void signOut()}
+            className="border-destructive/40 text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="size-4" /> Sign out
+          </Button>
         </div>
       </section>
     </div>

@@ -2,11 +2,14 @@
   "name": "tanstack_start_ts",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "sideEffects": false,
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "npx cross-env NITRO_PRESET=vercel vite build",
+    "build": "vite build && npx nitropack build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -84,7 +87,9 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "nitro": "^3.0.0",
+    "nitropack": "^2.13.4",
     "prettier": "^3.7.3",
+    "rendu": "^0.1.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.1.5"

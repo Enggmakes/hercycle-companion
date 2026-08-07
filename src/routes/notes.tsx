@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { NotebookPen, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store-context";
@@ -29,6 +29,7 @@ function NotesPage() {
   const { profile, updateProfile, ready } = useStore();
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [text, setText] = useState("");
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentStoreNote = profile?.notes?.[date] ?? "";
 
@@ -37,15 +38,22 @@ function NotesPage() {
     setText(currentStoreNote);
   }, [date, currentStoreNote]);
 
+  useEffect(() => () => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+  }, []);
+
   if (!ready) return null;
 
   const handleTextChange = (val: string) => {
     const clean = val.slice(0, 1000);
     setText(clean);
-    updateProfile((p) => ({
-      ...p,
-      notes: { ...p.notes, [date]: clean },
-    }));
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      updateProfile((p) => ({
+        ...p,
+        notes: { ...p.notes, [date]: clean },
+      }));
+    }, 250);
   };
 
   const entries = Object.entries(profile.notes ?? {}).sort((a, b) => b[0].localeCompare(a[0]));

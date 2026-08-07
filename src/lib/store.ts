@@ -10,7 +10,9 @@ export type SymptomId =
   | "cramps"
   | "headache"
   | "bloating"
+  | "tired"
   | "fatigue"
+  | "normal"
   | "cravings"
   | "mood-swings"
   | "irritated"
@@ -34,7 +36,7 @@ export const SYMPTOMS: { id: SymptomId; emoji: string; label: string; category: 
   { id: "cramps", emoji: "😣", label: "Cramps", category: "physical" },
   { id: "headache", emoji: "🤕", label: "Headache", category: "physical" },
   { id: "bloating", emoji: "🫄", label: "Bloating", category: "physical" },
-  { id: "fatigue", emoji: "😴", label: "Fatigue", category: "physical" },
+  { id: "tired", emoji: "😴", label: "Tired", category: "physical" },
   { id: "cravings", emoji: "🍫", label: "Cravings", category: "physical" },
   { id: "acne", emoji: "✨", label: "Acne/Skin", category: "physical" },
   { id: "backache", emoji: "🦴", label: "Backache", category: "physical" },
@@ -42,6 +44,7 @@ export const SYMPTOMS: { id: SymptomId; emoji: string; label: string; category: 
   { id: "irritated", emoji: "😡", label: "Irritated", category: "emotional" },
   { id: "sad", emoji: "😔", label: "Low Mood", category: "emotional" },
   { id: "happy", emoji: "😊", label: "Happy/Energetic", category: "emotional" },
+  { id: "normal", emoji: "😐", label: "Normal", category: "emotional" },
 ];
 
 export const FLOW_LEVELS: { id: FlowLevel; label: string; icon: string }[] = [

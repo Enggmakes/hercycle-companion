@@ -15,6 +15,15 @@ export function generateDoctorPdf(profile: Profile, includeNotes: boolean = fals
   const symptomsMap = new Map(SYMPTOMS.map((item) => [item.id, item]));
   const flowsMap = new Map(FLOW_LEVELS.map((item) => [item.id, item]));
 
+  const SYMPTOM_ALIASES: Record<string, { emoji: string; label: string }> = {
+    fatigue: { emoji: "😴", label: "Tired" },
+    tired: { emoji: "😴", label: "Tired" },
+    normal: { emoji: "😐", label: "Normal" },
+  };
+
+  const getSymptomMeta = (id: string) =>
+    symptomsMap.get(id as any) ?? SYMPTOM_ALIASES[id] ?? { emoji: "📍", label: id };
+
   // Collect all unique dates with symptoms, moods, flows, or notes
   const datesSet = new Set<string>([
     ...Object.keys(profile.symptoms ?? {}),
@@ -173,8 +182,8 @@ export function generateDoctorPdf(profile: Profile, includeNotes: boolean = fals
         ? '<div style="font-size: 12px; color: #64748b;">No symptoms logged yet.</div>'
         : Object.entries(symptomCounts)
             .map(([symId, cnt]) => {
-              const meta = symptomsMap.get(symId as any);
-              return `<div class="tag">${meta?.emoji ?? "📍"} <strong>${meta?.label ?? symId}:</strong> ${cnt} times</div>`;
+              const meta = getSymptomMeta(symId);
+              return `<div class="tag">${meta.emoji} <strong>${meta.label}:</strong> ${cnt} times</div>`;
             })
             .join("")
     }
@@ -199,8 +208,8 @@ export function generateDoctorPdf(profile: Profile, includeNotes: boolean = fals
                 const syms = profile.symptoms[dt] ?? (profile.moods[dt] ? [profile.moods[dt]] : []);
                 const symsStr = syms
                   .map((id) => {
-                    const item = symptomsMap.get(id as any);
-                    return item ? `${item.emoji} ${item.label}` : id;
+                    const item = getSymptomMeta(id);
+                    return `${item.emoji} ${item.label}`;
                   })
                   .join(", ");
 

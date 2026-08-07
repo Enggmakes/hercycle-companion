@@ -13,6 +13,13 @@ export function PinGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (ready && !data.pin) setUnlocked(true);
+
+    const handleLock = () => {
+      if (data.pin) setUnlocked(false);
+    };
+
+    window.addEventListener("hercycle:pin-lock", handleLock);
+    return () => window.removeEventListener("hercycle:pin-lock", handleLock);
   }, [ready, data.pin]);
 
   if (!ready) return null;

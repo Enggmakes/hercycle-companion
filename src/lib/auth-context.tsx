@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -43,6 +44,9 @@ const LOCAL_USER: AuthUser = {
   photoURL: null,
 };
 
+const PIN_LOCK_INACTIVITY_MS = 10 * 60 * 1000; // 10 minutes
+const SIGNOUT_INACTIVITY_MS = 30 * 60 * 1000; // 30 minutes
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(
     isFirebaseConfigured ? null : LOCAL_USER,
@@ -51,6 +55,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [signOutFn, setSignOutFn] = useState<() => Promise<void>>(
     () => async () => {},
   );
+
+  const lastActiveRef = useRef<number>(Date.now());
+
+  // ── Track User Activity for Inactivity Timers ──────────────────────────────
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const updateActivity = () => {
+      lastActiveRef.current = Date.now();
+    };
+
+    const events = ["mousemove", "keydown", "touchstart", "scroll", "click"];
+    events.forEach((evt) => window.addEventListener(evt, updateActivity, { passive: true }));
+
+    // Check inactivity every 10 seconds
+    const interval = setInterval(() => {
+      if (!user) return;
+
+      const idleMs = Date.now() - lastActiveRef.current;
+
+      // 30 minutes idle -> Auto Sign Out
+      if (idleMs >= SIGNOUT_INACTIVITY_MS) {
+        console.warn("[HerCycle] Auto signing out due to 30 minutes of inactivity.");
+        void signOutFn();
+      }
+      // 10 minutes idle -> Lock PIN Screen
+      else if (idleMs >= PIN_LOCK_INACTIVITY_MS) {
+        window.dispatchEvent(new CustomEvent("hercycle:pin-lock"));
+      }
+    }, 10_000);
+
+    return () => {
+      events.forEach((evt) => window.removeEventListener(evt, updateActivity));
+      clearInterval(interval);
+    };
+  }, [user, signOutFn]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !isFirebaseConfigured) return;

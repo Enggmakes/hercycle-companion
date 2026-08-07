@@ -70,6 +70,16 @@ function SettingsPage() {
 
   return (
     <div className="space-y-5">
+      {localMode ? (
+        <section className="glass p-5">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <LogOut className="size-4 text-primary" /> Storage
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Everything stays on this device — no account, no cloud sync.
+          </p>
+        </section>
+      ) : (
       <section className="glass p-5">
         <h1 className="text-2xl font-semibold">Cycle setup</h1>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
@@ -280,6 +290,7 @@ function SettingsPage() {
           </Button>
         </div>
       </section>
+      )}
     </div>
   );
 }

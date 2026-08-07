@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { NotebookPen, Trash2 } from "lucide-react";
 import { useStore } from "@/lib/store-context";
@@ -28,7 +28,25 @@ export const Route = createFileRoute("/notes")({
 function NotesPage() {
   const { profile, updateProfile, ready } = useStore();
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [text, setText] = useState("");
+
+  const currentStoreNote = profile?.notes?.[date] ?? "";
+
+  // Synchronize local text state when date or remote note content changes
+  useEffect(() => {
+    setText(currentStoreNote);
+  }, [date, currentStoreNote]);
+
   if (!ready) return null;
+
+  const handleTextChange = (val: string) => {
+    const clean = val.slice(0, 1000);
+    setText(clean);
+    updateProfile((p) => ({
+      ...p,
+      notes: { ...p.notes, [date]: clean },
+    }));
+  };
 
   const entries = Object.entries(profile.notes ?? {}).sort((a, b) => b[0].localeCompare(a[0]));
 
@@ -44,13 +62,8 @@ function NotesPage() {
             rows={4}
             maxLength={1000}
             placeholder="She had severe cramps. Bought flowers. Favorite food: pizza."
-            value={profile.notes[date] ?? ""}
-            onChange={(e) =>
-              updateProfile((p) => ({
-                ...p,
-                notes: { ...p.notes, [date]: e.target.value.slice(0, 1000) },
-              }))
-            }
+            value={text}
+            onChange={(e) => handleTextChange(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">Saved automatically on this device.</p>
         </div>

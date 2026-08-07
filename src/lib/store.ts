@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CycleSettings } from "./cycle";
 import { firebaseConfig } from "./firebase";
 
@@ -226,5 +226,8 @@ export function useAppData(uid: string) {
   const profile: Profile =
     data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0]!;
 
-  return { data, setData, update, updateProfile, profile, ready };
+  return useMemo(
+    () => ({ data, setData, update, updateProfile, profile, ready }),
+    [data, update, updateProfile, profile, ready],
+  );
 }

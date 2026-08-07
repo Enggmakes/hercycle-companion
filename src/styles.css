@@ -168,7 +168,8 @@
   body {
     background-color: var(--color-background);
     background-image: var(--gradient-page);
-    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -185,7 +186,8 @@
 @utility glass {
   background-color: var(--card);
   border: 1px solid var(--border);
-  backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--shadow-soft);
   border-radius: var(--radius-2xl);
 }

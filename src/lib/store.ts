@@ -44,8 +44,8 @@ export type AppData = {
 
 export const DEFAULT_PROFILE_ID = "default_profile";
 
-export const makeProfile = (name = "My love", id = DEFAULT_PROFILE_ID): Profile => ({
-  id,
+export const makeProfile = (name = "My love", id?: string): Profile => ({
+  id: id ?? `profile_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
   name,
   settings: {
     lastPeriodStart: new Date(Date.now() - 86400000 * 6).toISOString().slice(0, 10),
@@ -276,8 +276,9 @@ export function useAppData(uid: string) {
     }));
   }, []);
 
+  const fallbackProfile = makeProfile("My love", DEFAULT_PROFILE_ID);
   const profile: Profile =
-    data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0] ?? defaultData().profiles[0]!;
+    data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0] ?? fallbackProfile;
 
   return useMemo(
     () => ({ data, setData, update, updateProfile, profile, ready }),

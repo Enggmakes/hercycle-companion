@@ -8,8 +8,8 @@ const StoreContext = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  // uid is always a non-empty string here because AuthGate ensures we're logged in
-  const store = useAppData(user!.uid);
+  // AuthGate normally guarantees a user; keep local mode safe during auth transitions.
+  const store = useAppData(user?.uid ?? "local");
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 

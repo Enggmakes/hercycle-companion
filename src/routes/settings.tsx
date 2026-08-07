@@ -41,7 +41,7 @@ const REMINDERS: { id: string; label: string }[] = [
 
 function SettingsPage() {
   const { data, setData, update, updateProfile, profile, ready } = useStore();
-  const { user, signOut } = useAuth();
+  const { user, signOut, localMode } = useAuth();
   const [pin, setPin] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   if (!ready) return null;

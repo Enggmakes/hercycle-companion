@@ -1,5 +1,5 @@
 import "./lib/error-capture";
-import { eventHandler, toWebRequest } from "h3";
+import { eventHandler, toRequest } from "h3";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
@@ -46,7 +46,8 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default eventHandler(async (event) => {
   try {
-    const request = toWebRequest(event);
+    const webEvent = event as unknown as { web?: { request?: Request }; node?: { req?: any } };
+    const request = webEvent.web?.request ?? toRequest(webEvent.node?.req ?? "http://localhost/");
     const handler = await getServerEntry();
     const response = await handler.fetch(request, {}, {});
     return await normalizeCatastrophicSsrResponse(response);

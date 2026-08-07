@@ -118,8 +118,12 @@ export function useAppData(uid: string) {
   // Always ready — UI renders immediately with defaults, Firebase updates later
   const [ready] = useState(true);
 
+  const dataRef = useRef(data);
+  dataRef.current = data;
+
   const skipWrite = useRef(false);
   const writeRef = useRef<((d: AppData) => void) | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Subscribe to Firebase on mount (or when uid changes) ─────────────────
   useEffect(() => {
@@ -129,7 +133,9 @@ export function useAppData(uid: string) {
     let active = true;
 
     // Reset to defaults immediately when the user changes
-    setData(defaultData());
+    const initial = defaultData();
+    setData(initial);
+    dataRef.current = initial;
 
     Promise.all([
       import("firebase/app"),
@@ -154,8 +160,12 @@ export function useAppData(uid: string) {
           const val = snapshot.val() as AppData | null;
 
           if (val && val.profiles?.length) {
-            skipWrite.current = true;
-            setData(sanitizeAppData(val));
+            const sanitized = sanitizeAppData(val);
+            // Only update local state if incoming remote data is actually different
+            if (JSON.stringify(sanitized) !== JSON.stringify(dataRef.current)) {
+              skipWrite.current = true;
+              setData(sanitized);
+            }
           } else if (val === null) {
             // New user — seed their data
             writeRef.current?.(defaultData());
@@ -180,13 +190,24 @@ export function useAppData(uid: string) {
     document.documentElement.classList.toggle("dark", data.theme === "dark");
   }, [data.theme]);
 
-  // ── Write to Firebase on local changes ────────────────────────────────────
+  // ── Write to Firebase on local changes (Debounced 500ms) ──────────────────
   useEffect(() => {
     if (skipWrite.current) {
       skipWrite.current = false;
       return;
     }
-    writeRef.current?.(data);
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      writeRef.current?.(data);
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [data]);
 
   // ─── Updaters ─────────────────────────────────────────────────────────────

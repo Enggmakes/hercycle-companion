@@ -118,12 +118,14 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
 
 // ─── Local storage fallback ──────────────────────────────────────────────────
 
-const STORAGE_KEY = "hercycle_app_data";
+// ─── Local storage fallback ──────────────────────────────────────────────────
 
-export function loadLocalData(): AppData {
+const storageKey = (uid?: string) => (uid ? `hercycle_app_data_${uid}` : "hercycle_app_data");
+
+export function loadLocalData(uid?: string): AppData {
   if (typeof window === "undefined") return defaultData();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey(uid));
     if (raw) return sanitizeAppData(JSON.parse(raw));
   } catch {
     /* ignore */
@@ -131,10 +133,10 @@ export function loadLocalData(): AppData {
   return defaultData();
 }
 
-export function saveLocalData(d: AppData) {
-  if (typeof window === "undefined") return;
+export function saveLocalData(uid: string | undefined, d: AppData) {
+  if (typeof window === "undefined" || !uid) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    localStorage.setItem(storageKey(uid), JSON.stringify(d));
   } catch {
     /* ignore */
   }
@@ -151,7 +153,7 @@ const dbPath = (uid: string) => `users/${uid}/appData`;
  * Data is stored privately per user at `users/{uid}/appData`.
  */
 export function useAppData(uid: string) {
-  const [data, setData] = useState<AppData>(loadLocalData);
+  const [data, setData] = useState<AppData>(() => loadLocalData(uid));
   const [ready] = useState(true);
 
   const dataRef = useRef(data);
@@ -162,10 +164,19 @@ export function useAppData(uid: string) {
   const writeRef = useRef<((d: AppData) => void) | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Sync with local storage on uid change ────────────────────────────────
+  useEffect(() => {
+    if (!uid) return;
+    const local = loadLocalData(uid);
+    setData(local);
+    dataRef.current = local;
+  }, [uid]);
+
   // ── Sync to localStorage ──────────────────────────────────────────────────
   useEffect(() => {
-    saveLocalData(data);
-  }, [data]);
+    if (!uid) return;
+    saveLocalData(uid, data);
+  }, [uid, data]);
 
   // ── Subscribe to Firebase on mount (or when uid changes) ─────────────────
   useEffect(() => {
@@ -173,12 +184,6 @@ export function useAppData(uid: string) {
 
     let unsubscribe: (() => void) | null = null;
     let active = true;
-
-    // Reset to defaults immediately when the user changes
-    const initial = defaultData();
-    setData(initial);
-    dataRef.current = initial;
-    lastWrittenJsonRef.current = JSON.stringify(initial);
 
     Promise.all([
       import("firebase/app"),
@@ -217,11 +222,10 @@ export function useAppData(uid: string) {
               setData(sanitized);
             }
           } else {
-            // New user — seed initial default data once
-            const seeded = defaultData();
+            // New user on Firebase — seed Firebase with existing local data
+            const local = loadLocalData(uid);
             skipWrite.current = true;
-            setData(seeded);
-            writeRef.current?.(seeded);
+            writeRef.current?.(local);
           }
         },
         (error) => {

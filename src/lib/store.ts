@@ -42,8 +42,10 @@ export type AppData = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export const makeProfile = (name = "My love"): Profile => ({
-  id: Math.random().toString(36).slice(2),
+export const DEFAULT_PROFILE_ID = "default_profile";
+
+export const makeProfile = (name = "My love", id = DEFAULT_PROFILE_ID): Profile => ({
+  id,
   name,
   settings: {
     lastPeriodStart: new Date(Date.now() - 86400000 * 6).toISOString().slice(0, 10),
@@ -64,40 +66,53 @@ export const makeProfile = (name = "My love"): Profile => ({
 });
 
 export const defaultData = (): AppData => {
-  const p = makeProfile();
-  return { profiles: [p], activeId: p.id, pin: null, theme: "light" };
+  const p = makeProfile("My love", DEFAULT_PROFILE_ID);
+  return { profiles: [p], activeId: DEFAULT_PROFILE_ID, pin: null, theme: "light" };
 };
 
 /**
  * Firebase strips empty arrays and objects from stored data.
  * This fills in missing fields so components never get `undefined`.
  */
-export function sanitizeProfile(raw: Partial<Profile>): Profile {
-  const base = makeProfile(raw.name ?? "My love");
+export function sanitizeProfile(raw: Partial<Profile>, index = 0): Profile {
+  const defaultId = index === 0 ? DEFAULT_PROFILE_ID : `profile_${index}`;
+  const base = makeProfile(raw.name ?? "My love", raw.id ?? defaultId);
   return {
     ...base,
     ...raw,
     id: raw.id ?? base.id,
     name: raw.name ?? base.name,
-    settings: raw.settings ?? base.settings,
-    moods: raw.moods ?? {},
-    notes: raw.notes ?? {},
-    memories: Array.isArray(raw.memories) ? raw.memories : [],
-    reminders: raw.reminders ?? base.reminders,
+    settings: raw.settings ? { ...base.settings, ...raw.settings } : base.settings,
+    moods: raw.moods && typeof raw.moods === "object" ? raw.moods : {},
+    notes: raw.notes && typeof raw.notes === "object" ? raw.notes : {},
+    memories: Array.isArray(raw.memories)
+      ? raw.memories
+      : raw.memories && typeof raw.memories === "object"
+        ? (Object.values(raw.memories) as Memory[])
+        : [],
+    reminders: raw.reminders ? { ...base.reminders, ...raw.reminders } : base.reminders,
   };
 }
 
-export function sanitizeAppData(raw: Partial<AppData>): AppData {
-  const def = defaultData();
+export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppData {
+  if (!raw || typeof raw !== "object") return defaultData();
+
+  const rawProfiles = Array.isArray(raw.profiles)
+    ? raw.profiles
+    : raw.profiles && typeof raw.profiles === "object"
+      ? Object.values(raw.profiles)
+      : [];
+
   const profiles =
-    Array.isArray(raw.profiles) && raw.profiles.length
-      ? (raw.profiles as Partial<Profile>[]).map(sanitizeProfile)
-      : def.profiles;
+    rawProfiles.length > 0
+      ? (rawProfiles as Partial<Profile>[]).map((p, idx) => sanitizeProfile(p, idx))
+      : defaultData().profiles;
+
   return {
     profiles,
-    activeId: raw.activeId ?? profiles[0]!.id,
+    activeId: raw.activeId ?? profiles[0]?.id ?? DEFAULT_PROFILE_ID,
     pin: raw.pin ?? null,
-    theme: raw.theme ?? "light",
+    theme: raw.theme === "dark" ? "dark" : "light",
   };
 }
 
@@ -110,17 +125,15 @@ const dbPath = (uid: string) => `users/${uid}/appData`;
 /**
  * App store backed by Firebase Realtime Database.
  * Data is stored privately per user at `users/{uid}/appData`.
- * Pass the authenticated user's `uid`; pass `null` to skip Firebase (should not happen).
  */
 export function useAppData(uid: string) {
   const [data, setData] = useState<AppData>(defaultData);
-
-  // Always ready — UI renders immediately with defaults, Firebase updates later
   const [ready] = useState(true);
 
   const dataRef = useRef(data);
   dataRef.current = data;
 
+  const lastWrittenJsonRef = useRef<string>("");
   const skipWrite = useRef(false);
   const writeRef = useRef<((d: AppData) => void) | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -136,6 +149,7 @@ export function useAppData(uid: string) {
     const initial = defaultData();
     setData(initial);
     dataRef.current = initial;
+    lastWrittenJsonRef.current = JSON.stringify(initial);
 
     Promise.all([
       import("firebase/app"),
@@ -148,6 +162,8 @@ export function useAppData(uid: string) {
       const path = dbPath(uid);
 
       writeRef.current = (d: AppData) => {
+        const json = JSON.stringify(d);
+        lastWrittenJsonRef.current = json;
         set(ref(db, path), d).catch((err) =>
           console.warn("[HerCycle] Firebase write failed:", err),
         );
@@ -157,18 +173,26 @@ export function useAppData(uid: string) {
         ref(db, path),
         (snapshot) => {
           if (!active) return;
-          const val = snapshot.val() as AppData | null;
+          const val = snapshot.val();
 
-          if (val && val.profiles?.length) {
+          if (val) {
             const sanitized = sanitizeAppData(val);
-            // Only update local state if incoming remote data is actually different
-            if (JSON.stringify(sanitized) !== JSON.stringify(dataRef.current)) {
+            const sanitizedJson = JSON.stringify(sanitized);
+
+            // Skip updating state if the remote snapshot matches what we currently have or last wrote
+            if (
+              sanitizedJson !== JSON.stringify(dataRef.current) &&
+              sanitizedJson !== lastWrittenJsonRef.current
+            ) {
               skipWrite.current = true;
               setData(sanitized);
             }
-          } else if (val === null) {
-            // New user — seed their data
-            writeRef.current?.(defaultData());
+          } else {
+            // New user — seed initial default data once
+            const seeded = defaultData();
+            skipWrite.current = true;
+            setData(seeded);
+            writeRef.current?.(seeded);
           }
         },
         (error) => {
@@ -224,7 +248,7 @@ export function useAppData(uid: string) {
   }, []);
 
   const profile: Profile =
-    data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0]!;
+    data.profiles.find((p) => p.id === data.activeId) ?? data.profiles[0] ?? defaultData().profiles[0]!;
 
   return useMemo(
     () => ({ data, setData, update, updateProfile, profile, ready }),

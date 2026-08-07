@@ -10,3 +10,8 @@ export const firebaseConfig = {
   appId: import.meta.env["VITE_FIREBASE_APP_ID"] ?? "",
   measurementId: import.meta.env["VITE_FIREBASE_MEASUREMENT_ID"] ?? "",
 };
+
+// When no Firebase project is configured, the app runs fully local-first
+// (localStorage only) instead of crashing on auth/invalid-api-key.
+export const isFirebaseConfigured =
+  Boolean(firebaseConfig.apiKey) && Boolean(firebaseConfig.projectId);

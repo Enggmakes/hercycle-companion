@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { firebaseConfig } from "./firebase";
+import { firebaseConfig, isFirebaseConfigured } from "./firebase";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -21,6 +21,7 @@ type AuthCtx = {
   user: AuthUser | null;
   authLoading: boolean;
   signOut: () => Promise<void>;
+  localMode: boolean;
 };
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -35,15 +36,24 @@ export function useAuth() {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
+const LOCAL_USER: AuthUser = {
+  uid: "local",
+  email: null,
+  displayName: "My love",
+  photoURL: null,
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser | null>(
+    isFirebaseConfigured ? null : LOCAL_USER,
+  );
+  const [authLoading, setAuthLoading] = useState(isFirebaseConfigured);
   const [signOutFn, setSignOutFn] = useState<() => Promise<void>>(
     () => async () => {},
   );
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isFirebaseConfigured) return;
 
     let unsubscribe: (() => void) | null = null;
 
@@ -81,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, authLoading, signOut: signOutFn }),
+    () => ({ user, authLoading, signOut: signOutFn, localMode: !isFirebaseConfigured }),
     [user, authLoading, signOutFn],
   );
 

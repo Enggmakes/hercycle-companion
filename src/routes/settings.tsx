@@ -41,7 +41,7 @@ const REMINDERS: { id: string; label: string }[] = [
 
 function SettingsPage() {
   const { data, setData, update, updateProfile, profile, ready } = useStore();
-  const { user, signOut } = useAuth();
+  const { user, signOut, localMode } = useAuth();
   const [pin, setPin] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   if (!ready) return null;
@@ -260,6 +260,16 @@ function SettingsPage() {
         </div>
       </section>
 
+      {localMode ? (
+        <section className="glass p-5">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <LogOut className="size-4 text-primary" /> Storage
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Everything stays on this device — no account, no cloud sync.
+          </p>
+        </section>
+      ) : (
       <section className="glass p-5">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <LogOut className="size-4 text-primary" /> Account
@@ -280,6 +290,7 @@ function SettingsPage() {
           </Button>
         </div>
       </section>
+      )}
     </div>
   );
 }

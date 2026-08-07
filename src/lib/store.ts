@@ -116,6 +116,30 @@ export function sanitizeAppData(raw: Partial<AppData> | null | undefined): AppDa
   };
 }
 
+// ─── Local storage fallback ──────────────────────────────────────────────────
+
+const STORAGE_KEY = "hercycle_app_data";
+
+export function loadLocalData(): AppData {
+  if (typeof window === "undefined") return defaultData();
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return sanitizeAppData(JSON.parse(raw));
+  } catch {
+    /* ignore */
+  }
+  return defaultData();
+}
+
+export function saveLocalData(d: AppData) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  } catch {
+    /* ignore */
+  }
+}
+
 // ─── DB path per user ────────────────────────────────────────────────────────
 
 const dbPath = (uid: string) => `users/${uid}/appData`;
@@ -123,11 +147,11 @@ const dbPath = (uid: string) => `users/${uid}/appData`;
 // ─── Main store hook ─────────────────────────────────────────────────────────
 
 /**
- * App store backed by Firebase Realtime Database.
+ * App store backed by Firebase Realtime Database with local storage caching.
  * Data is stored privately per user at `users/{uid}/appData`.
  */
 export function useAppData(uid: string) {
-  const [data, setData] = useState<AppData>(defaultData);
+  const [data, setData] = useState<AppData>(loadLocalData);
   const [ready] = useState(true);
 
   const dataRef = useRef(data);
@@ -137,6 +161,11 @@ export function useAppData(uid: string) {
   const skipWrite = useRef(false);
   const writeRef = useRef<((d: AppData) => void) | null>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Sync to localStorage ──────────────────────────────────────────────────
+  useEffect(() => {
+    saveLocalData(data);
+  }, [data]);
 
   // ── Subscribe to Firebase on mount (or when uid changes) ─────────────────
   useEffect(() => {

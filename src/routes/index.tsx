@@ -142,19 +142,32 @@ function Dashboard() {
             <Droplets className="size-4 text-primary" /> How is she feeling?
           </h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {MOODS.map((m) => (
-              <button
-                key={m.id}
-                onClick={() =>
-                  updateProfile((p) => ({ ...p, moods: { ...p.moods, [key]: m.id } }))
-                }
-                data-active={mood === m.id}
-                className="rounded-2xl border border-border px-3 py-2 text-sm transition-all hover:scale-105 data-[active=true]:gradient-romance data-[active=true]:text-primary-foreground"
-              >
-                <span className="mr-1">{m.emoji}</span>
-                {m.label}
-              </button>
-            ))}
+            {MOODS.map((m) => {
+              const currentSyms = profile.symptoms[key] ?? (profile.moods[key] ? [profile.moods[key] as any] : []);
+              const isActive = currentSyms.includes(m.id as any);
+              return (
+                <button
+                  key={m.id}
+                  onClick={() =>
+                    updateProfile((p) => {
+                      const cur = p.symptoms[key] ?? (p.moods[key] ? [p.moods[key] as any] : []);
+                      const exists = cur.includes(m.id as any);
+                      const next = exists ? cur.filter((x: string) => x !== m.id) : [...cur, m.id];
+                      return {
+                        ...p,
+                        moods: { ...p.moods, [key]: m.id },
+                        symptoms: { ...p.symptoms, [key]: next },
+                      };
+                    })
+                  }
+                  data-active={isActive}
+                  className="rounded-2xl border border-border px-3 py-2 text-sm transition-all hover:scale-105 data-[active=true]:gradient-romance data-[active=true]:text-primary-foreground"
+                >
+                  <span className="mr-1">{m.emoji}</span>
+                  {m.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>

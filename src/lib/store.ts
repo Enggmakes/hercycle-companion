@@ -159,6 +159,7 @@ export function useAppData(uid: string) {
   const dataRef = useRef(data);
   dataRef.current = data;
 
+  const isRemoteLoaded = useRef(false);
   const lastWrittenJsonRef = useRef<string>("");
   const skipWrite = useRef(false);
   const writeRef = useRef<((d: AppData) => void) | null>(null);
@@ -170,6 +171,7 @@ export function useAppData(uid: string) {
     const local = loadLocalData(uid);
     setData(local);
     dataRef.current = local;
+    isRemoteLoaded.current = false;
   }, [uid]);
 
   // ── Sync to localStorage ──────────────────────────────────────────────────
@@ -220,6 +222,7 @@ export function useAppData(uid: string) {
             ) {
               skipWrite.current = true;
               setData(sanitized);
+              saveLocalData(uid, sanitized);
             }
           } else {
             // New user on Firebase — seed Firebase with existing local data
@@ -227,13 +230,18 @@ export function useAppData(uid: string) {
             skipWrite.current = true;
             writeRef.current?.(local);
           }
+
+          // Mark remote sync as ready — now local user edits can safely sync to Firebase
+          isRemoteLoaded.current = true;
         },
         (error) => {
           console.warn("[HerCycle] Firebase read error:", error.message);
+          isRemoteLoaded.current = true;
         },
       );
     }).catch((err) => {
       console.warn("[HerCycle] Firebase unavailable:", err);
+      isRemoteLoaded.current = true;
     });
 
     return () => {
@@ -249,6 +257,9 @@ export function useAppData(uid: string) {
 
   // ── Write to Firebase on local changes (Debounced 500ms) ──────────────────
   useEffect(() => {
+    // CRITICAL: Never write local data to Firebase until initial remote fetch finishes!
+    if (!isRemoteLoaded.current) return;
+
     if (skipWrite.current) {
       skipWrite.current = false;
       return;

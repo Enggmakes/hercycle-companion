@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { firebaseConfig, isFirebaseConfigured } from "./firebase";
+import { clearLocalData } from "./store";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const auth = getAuth(app);
 
       // Expose sign-out so the rest of the app can call it
-      setSignOutFn(() => () => signOut(auth));
+      setSignOutFn(() => async () => {
+        if (auth.currentUser?.uid) {
+          clearLocalData(auth.currentUser.uid);
+        }
+        await signOut(auth);
+      });
 
       unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
         if (firebaseUser) {

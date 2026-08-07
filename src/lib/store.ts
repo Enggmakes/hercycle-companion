@@ -142,6 +142,15 @@ export function saveLocalData(uid: string | undefined, d: AppData) {
   }
 }
 
+export function clearLocalData(uid?: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(storageKey(uid));
+  } catch {
+    /* ignore */
+  }
+}
+
 // ─── DB path per user ────────────────────────────────────────────────────────
 
 const dbPath = (uid: string) => `users/${uid}/appData`;

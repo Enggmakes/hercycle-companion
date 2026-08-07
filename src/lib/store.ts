@@ -6,6 +6,21 @@ import { firebaseConfig, isFirebaseConfigured } from "./firebase";
 
 export type MoodId = "happy" | "normal" | "sad" | "cramps" | "irritated" | "tired";
 
+export type SymptomId =
+  | "cramps"
+  | "headache"
+  | "bloating"
+  | "fatigue"
+  | "cravings"
+  | "mood-swings"
+  | "irritated"
+  | "sad"
+  | "happy"
+  | "acne"
+  | "backache";
+
+export type FlowLevel = "spotting" | "light" | "medium" | "heavy";
+
 export const MOODS: { id: MoodId; emoji: string; label: string; score: number }[] = [
   { id: "happy", emoji: "😊", label: "Happy", score: 5 },
   { id: "normal", emoji: "😐", label: "Normal", score: 4 },
@@ -13,6 +28,27 @@ export const MOODS: { id: MoodId; emoji: string; label: string; score: number }[
   { id: "sad", emoji: "😔", label: "Sad", score: 2 },
   { id: "irritated", emoji: "😡", label: "Irritated", score: 2 },
   { id: "cramps", emoji: "😣", label: "Cramps", score: 1 },
+];
+
+export const SYMPTOMS: { id: SymptomId; emoji: string; label: string; category: "physical" | "emotional" }[] = [
+  { id: "cramps", emoji: "😣", label: "Cramps", category: "physical" },
+  { id: "headache", emoji: "🤕", label: "Headache", category: "physical" },
+  { id: "bloating", emoji: "🫄", label: "Bloating", category: "physical" },
+  { id: "fatigue", emoji: "😴", label: "Fatigue", category: "physical" },
+  { id: "cravings", emoji: "🍫", label: "Cravings", category: "physical" },
+  { id: "acne", emoji: "✨", label: "Acne/Skin", category: "physical" },
+  { id: "backache", emoji: "🦴", label: "Backache", category: "physical" },
+  { id: "mood-swings", emoji: "🎭", label: "Mood Swings", category: "emotional" },
+  { id: "irritated", emoji: "😡", label: "Irritated", category: "emotional" },
+  { id: "sad", emoji: "😔", label: "Low Mood", category: "emotional" },
+  { id: "happy", emoji: "😊", label: "Happy/Energetic", category: "emotional" },
+];
+
+export const FLOW_LEVELS: { id: FlowLevel; label: string; icon: string }[] = [
+  { id: "spotting", label: "Spotting", icon: "💧" },
+  { id: "light", label: "Light", icon: "🩸" },
+  { id: "medium", label: "Medium", icon: "🩸🩸" },
+  { id: "heavy", label: "Heavy", icon: "🩸🩸🩸" },
 ];
 
 export type Memory = {
@@ -28,6 +64,8 @@ export type Profile = {
   name: string;
   settings: CycleSettings;
   moods: Record<string, MoodId>;
+  symptoms: Record<string, SymptomId[]>;
+  flows: Record<string, FlowLevel>;
   notes: Record<string, string>;
   memories: Memory[];
   reminders: Record<string, boolean>;
@@ -53,6 +91,8 @@ export const makeProfile = (name = "My love", id?: string): Profile => ({
     periodLength: 5,
   },
   moods: {},
+  symptoms: {},
+  flows: {},
   notes: {},
   memories: [],
   reminders: {
@@ -77,13 +117,28 @@ export const defaultData = (): AppData => {
 export function sanitizeProfile(raw: Partial<Profile>, index = 0): Profile {
   const defaultId = index === 0 ? DEFAULT_PROFILE_ID : `profile_${index}`;
   const base = makeProfile(raw.name ?? "My love", raw.id ?? defaultId);
+  const moods = raw.moods && typeof raw.moods === "object" ? raw.moods : {};
+  const rawSymptoms = raw.symptoms && typeof raw.symptoms === "object" ? raw.symptoms : {};
+  
+  // Ensure symptoms object maps to arrays of strings
+  const symptoms: Record<string, SymptomId[]> = {};
+  Object.entries(rawSymptoms).forEach(([dt, val]) => {
+    if (Array.isArray(val)) {
+      symptoms[dt] = val as SymptomId[];
+    } else if (typeof val === "object" && val !== null) {
+      symptoms[dt] = Object.values(val) as SymptomId[];
+    }
+  });
+
   return {
     ...base,
     ...raw,
     id: raw.id ?? base.id,
     name: raw.name ?? base.name,
     settings: raw.settings ? { ...base.settings, ...raw.settings } : base.settings,
-    moods: raw.moods && typeof raw.moods === "object" ? raw.moods : {},
+    moods,
+    symptoms,
+    flows: raw.flows && typeof raw.flows === "object" ? raw.flows : {},
     notes: raw.notes && typeof raw.notes === "object" ? raw.notes : {},
     memories: Array.isArray(raw.memories)
       ? raw.memories

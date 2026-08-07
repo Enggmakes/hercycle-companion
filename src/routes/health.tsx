@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HeartPulse, Info } from "lucide-react";
+import { FileText, HeartPulse } from "lucide-react";
 import { PHASE_INFO, SYMPTOMS } from "@/lib/content";
+import { useStore } from "@/lib/store-context";
+import { generateDoctorPdf } from "@/lib/pdf-export";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/health")({
   head: () => ({
@@ -22,12 +25,22 @@ export const Route = createFileRoute("/health")({
 });
 
 function HealthPage() {
+  const { profile } = useStore();
+
   return (
     <div className="space-y-5">
       <section className="glass p-6">
-        <h1 className="flex items-center gap-2 text-2xl font-semibold">
-          <HeartPulse className="size-5 text-primary" /> Understanding her cycle
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold">
+            <HeartPulse className="size-5 text-primary" /> Understanding her cycle
+          </h1>
+          <Button
+            onClick={() => generateDoctorPdf(profile)}
+            className="rounded-2xl gradient-romance text-primary-foreground shadow-md hover:opacity-95"
+          >
+            <FileText className="size-4" /> Export Doctor Summary (PDF)
+          </Button>
+        </div>
         <p className="mt-2 text-sm text-muted-foreground">
           A short, kind guide so you know what's happening and how to help.
         </p>

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FileText, HeartPulse } from "lucide-react";
+import { FileText, HeartPulse, Info } from "lucide-react";
 import { PHASE_INFO, SYMPTOMS } from "@/lib/content";
 import { useStore } from "@/lib/store-context";
 import { generateDoctorPdf } from "@/lib/pdf-export";
@@ -25,7 +25,8 @@ export const Route = createFileRoute("/health")({
 });
 
 function HealthPage() {
-  const { profile } = useStore();
+  const { profile, ready } = useStore();
+  if (!ready || !profile) return null;
 
   return (
     <div className="space-y-5">

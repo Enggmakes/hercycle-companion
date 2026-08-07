@@ -215,7 +215,7 @@ function SettingsPage() {
             size="sm"
             onClick={() =>
               update((d) => {
-                const np = makeProfile(`Profile ${d.profiles.length + 1}`);
+                const np = makeProfile(`Profile ${d.profiles.length + 1}`, `p_${Date.now()}`);
                 return { ...d, profiles: [...d.profiles, np], activeId: np.id };
               })
             }

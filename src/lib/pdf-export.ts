@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import type { Profile } from "./store";
 import { FLOW_LEVELS, SYMPTOMS } from "./store";
 
-export function generateDoctorPdf(profile: Profile) {
+export function generateDoctorPdf(profile: Profile, includeNotes: boolean = false) {
   if (typeof window === "undefined") return;
 
   const printWindow = window.open("", "_blank");
@@ -20,7 +20,7 @@ export function generateDoctorPdf(profile: Profile) {
     ...Object.keys(profile.symptoms ?? {}),
     ...Object.keys(profile.moods ?? {}),
     ...Object.keys(profile.flows ?? {}),
-    ...Object.keys(profile.notes ?? {}),
+    ...(includeNotes ? Object.keys(profile.notes ?? {}) : []),
   ]);
 
   const sortedDates = Array.from(datesSet).sort().reverse();
@@ -184,16 +184,16 @@ export function generateDoctorPdf(profile: Profile) {
   <table>
     <thead>
       <tr>
-        <th style="width: 15%;">Date</th>
-        <th style="width: 35%;">Logged Symptoms & Feelings</th>
-        <th style="width: 20%;">Flow Level</th>
-        <th style="width: 30%;">Notes & Clinical Details</th>
+        <th style="width: 18%;">Date</th>
+        <th style="width: 45%;">Logged Symptoms & Feelings</th>
+        <th style="width: 37%;">Flow Level</th>
+        ${includeNotes ? '<th style="width: 30%;">Journal Notes</th>' : ""}
       </tr>
     </thead>
     <tbody>
       ${
         sortedDates.length === 0
-          ? '<tr><td colspan="4" style="text-align: center; color: #64748b;">No detailed logs recorded.</td></tr>'
+          ? `<tr><td colspan="${includeNotes ? 4 : 3}" style="text-align: center; color: #64748b;">No detailed logs recorded.</td></tr>`
           : sortedDates
               .map((dt) => {
                 const syms = profile.symptoms[dt] ?? (profile.moods[dt] ? [profile.moods[dt]] : []);
@@ -213,7 +213,7 @@ export function generateDoctorPdf(profile: Profile) {
                   <td><strong>${dt}</strong></td>
                   <td>${symsStr || "—"}</td>
                   <td>${flowStr}</td>
-                  <td>${noteStr}</td>
+                  ${includeNotes ? `<td>${noteStr}</td>` : ""}
                 </tr>`;
               })
               .join("")

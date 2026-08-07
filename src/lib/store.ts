@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CycleSettings } from "./cycle";
-import { firebaseConfig } from "./firebase";
+import { firebaseConfig, isFirebaseConfigured } from "./firebase";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -169,7 +169,7 @@ export function useAppData(uid: string) {
 
   // ── Subscribe to Firebase on mount (or when uid changes) ─────────────────
   useEffect(() => {
-    if (typeof window === "undefined" || !uid) return;
+    if (typeof window === "undefined" || !uid || !isFirebaseConfigured) return;
 
     let unsubscribe: (() => void) | null = null;
     let active = true;

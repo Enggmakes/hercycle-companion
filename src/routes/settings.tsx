@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
-import { Download, LockKeyhole, LogOut, ShieldCheck, Upload, UserPlus } from "lucide-react";
+import { Download, LockKeyhole, LogOut, Minus, Plus, ShieldCheck, Upload, UserPlus } from "lucide-react";
 import { useStore } from "@/lib/store-context";
 import { useAuth } from "@/lib/auth-context";
 import { makeProfile, type AppData } from "@/lib/store";
@@ -38,6 +38,46 @@ const REMINDERS: { id: string; label: string }[] = [
   { id: "fertile", label: "Fertile window begins" },
   { id: "pms", label: "PMS begins" },
 ];
+
+function NumberStepper({
+  value,
+  min,
+  max,
+  unit = "days",
+  onChange,
+}: {
+  value: number;
+  min: number;
+  max: number;
+  unit?: string;
+  onChange: (val: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-2xl border border-border bg-background/50 p-1.5">
+      <button
+        type="button"
+        aria-label="Decrease"
+        disabled={value <= min}
+        onClick={() => onChange(Math.max(min, value - 1))}
+        className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-30 active:scale-95"
+      >
+        <Minus className="size-4" />
+      </button>
+      <div className="flex-1 text-center font-display text-base font-semibold">
+        {value} <span className="text-xs font-normal text-muted-foreground">{unit}</span>
+      </div>
+      <button
+        type="button"
+        aria-label="Increase"
+        disabled={value >= max}
+        onClick={() => onChange(Math.min(max, value + 1))}
+        className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground transition-all hover:bg-primary hover:text-primary-foreground disabled:opacity-30 active:scale-95"
+      >
+        <Plus className="size-4" />
+      </button>
+    </div>
+  );
+}
 
 function SettingsPage() {
   const { data, setData, update, updateProfile, profile, ready } = useStore();
@@ -89,38 +129,30 @@ function SettingsPage() {
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="cycle">Average cycle length</Label>
-            <Input
-              id="cycle"
-              type="number"
+            <NumberStepper
+              value={s.cycleLength}
               min={20}
               max={45}
-              value={s.cycleLength}
-              onChange={(e) =>
+              unit="days"
+              onChange={(val) =>
                 updateProfile((p) => ({
                   ...p,
-                  settings: {
-                    ...p.settings,
-                    cycleLength: Math.min(45, Math.max(20, Number(e.target.value) || 28)),
-                  },
+                  settings: { ...p.settings, cycleLength: val },
                 }))
               }
             />
           </div>
           <div className="grid gap-1.5">
             <Label htmlFor="period">Period length</Label>
-            <Input
-              id="period"
-              type="number"
+            <NumberStepper
+              value={s.periodLength}
               min={1}
               max={10}
-              value={s.periodLength}
-              onChange={(e) =>
+              unit="days"
+              onChange={(val) =>
                 updateProfile((p) => ({
                   ...p,
-                  settings: {
-                    ...p.settings,
-                    periodLength: Math.min(10, Math.max(1, Number(e.target.value) || 5)),
-                  },
+                  settings: { ...p.settings, periodLength: val },
                 }))
               }
             />

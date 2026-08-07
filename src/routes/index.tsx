@@ -45,7 +45,7 @@ function Stat({
   accent?: string;
 }) {
   return (
-    <motion.div whileHover={{ y: -3 }} className="glass p-4">
+    <div className="glass p-4 transition-transform hover:-translate-y-1">
       <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
         {label}
       </p>
@@ -53,7 +53,7 @@ function Stat({
         {value}
       </p>
       <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
-    </motion.div>
+    </div>
   );
 }
 

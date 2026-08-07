@@ -82,10 +82,9 @@ function CalendarPage() {
             const kind = dayKind(s, d);
             const isToday = isSameDay(d, today);
             return (
-              <motion.div
+              <div
                 key={d.toISOString()}
-                whileHover={{ scale: 1.08 }}
-                className="aspect-square"
+                className="aspect-square transition-transform hover:scale-105"
               >
                 <div
                   className="flex size-full flex-col items-center justify-center rounded-2xl text-sm font-semibold text-primary-foreground data-[dim=true]:opacity-40"
@@ -98,7 +97,7 @@ function CalendarPage() {
                 >
                   {format(d, "d")}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

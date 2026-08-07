@@ -69,16 +69,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={to}
                 to={to}
-                className="relative flex flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-2 text-[11px] font-medium text-muted-foreground transition-colors data-[active=true]:text-primary-foreground md:flex-row md:justify-center md:gap-2 md:text-sm"
+                className="relative flex flex-1 flex-col items-center gap-0.5 rounded-2xl px-1 py-2 text-[11px] font-medium text-muted-foreground transition-all data-[active=true]:gradient-romance data-[active=true]:text-primary-foreground md:flex-row md:justify-center md:gap-2 md:text-sm"
                 data-active={active}
               >
-                {active && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 rounded-2xl gradient-romance"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
                 <Icon className="relative size-4" />
                 <span className="relative">{label}</span>
               </Link>
@@ -86,15 +79,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <motion.main
-          key={pathname}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="mt-5 flex-1"
-        >
+        <main className="mt-5 flex-1 animate-fade-in">
           {children}
-        </motion.main>
+        </main>
 
         <footer className="mt-8 text-center text-xs text-muted-foreground">
           Stored only on this device · Predictions are estimates, not medical advice.

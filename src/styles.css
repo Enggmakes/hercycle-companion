@@ -4,34 +4,30 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * HerCycle — Warm Botanical & Intimate Editorial Design System
+ * Inspired by heirloom journals, warm apothecary herbalism, and quiet affection.
+ * All colors use modern oklch notation for perceptual uniformity and rich contrast.
  */
 
 @theme inline {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, Cambria, serif;
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
   --color-phase-period: var(--phase-period);
   --color-phase-fertile: var(--phase-fertile);
   --color-phase-ovulation: var(--phase-ovulation);
   --color-phase-pms: var(--phase-pms);
   --color-phase-safe: var(--phase-safe);
+
+  --radius-xs: calc(var(--radius) - 8px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+  --radius-3xl: calc(var(--radius) + 14px);
+  --radius-4xl: calc(var(--radius) + 20px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -52,112 +48,106 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 :root {
   --radius: 1.25rem;
-  --background: oklch(0.985 0.012 340);
-  --foreground: oklch(0.29 0.05 340);
-  --card: oklch(1 0 0 / 62%);
-  --card-foreground: oklch(0.29 0.05 340);
-  --popover: oklch(0.99 0.008 340);
-  --popover-foreground: oklch(0.29 0.05 340);
-  --primary: oklch(0.68 0.16 355);
-  --primary-foreground: oklch(0.99 0.005 340);
-  --secondary: oklch(0.93 0.045 300);
-  --secondary-foreground: oklch(0.34 0.07 310);
-  --muted: oklch(0.955 0.018 330);
-  --muted-foreground: oklch(0.53 0.045 330);
-  --accent: oklch(0.9 0.06 320);
-  --accent-foreground: oklch(0.32 0.07 330);
-  --destructive: oklch(0.6 0.21 20);
-  --destructive-foreground: oklch(0.99 0.005 340);
-  --border: oklch(0.9 0.03 330 / 70%);
-  --input: oklch(0.9 0.03 330 / 70%);
-  --ring: oklch(0.72 0.14 350);
-  --phase-period: oklch(0.63 0.2 20);
-  --phase-fertile: oklch(0.68 0.14 155);
-  --phase-ovulation: oklch(0.78 0.14 85);
-  --phase-pms: oklch(0.74 0.15 55);
-  --phase-safe: oklch(0.68 0.11 250);
-  --gradient-romance: linear-gradient(135deg, oklch(0.68 0.16 355), oklch(0.62 0.14 305));
+
+  /* Warm Porcelain / Linen Light Canvas */
+  --background: oklch(0.978 0.015 62);
+  --foreground: oklch(0.24 0.045 35);
+  
+  /* Layered Heirloom Paper Surfaces */
+  --card: oklch(0.995 0.008 60 / 88%);
+  --card-foreground: oklch(0.24 0.045 35);
+  --popover: oklch(0.99 0.01 60);
+  --popover-foreground: oklch(0.24 0.045 35);
+
+  /* Dusky Rose Terracotta & Pomegranate Accents */
+  --primary: oklch(0.63 0.17 25);
+  --primary-foreground: oklch(0.99 0.005 60);
+  --secondary: oklch(0.94 0.032 45);
+  --secondary-foreground: oklch(0.32 0.06 35);
+  
+  --muted: oklch(0.945 0.018 55);
+  --muted-foreground: oklch(0.50 0.038 45);
+  
+  --accent: oklch(0.92 0.045 38);
+  --accent-foreground: oklch(0.28 0.065 30);
+  
+  --destructive: oklch(0.58 0.20 25);
+  --destructive-foreground: oklch(0.99 0.005 60);
+  
+  --border: oklch(0.89 0.025 55 / 75%);
+  --input: oklch(0.89 0.025 55 / 75%);
+  --ring: oklch(0.65 0.16 26);
+
+  /* Cycle Phase Palette: Tactile Botanical Nuances */
+  --phase-period: oklch(0.60 0.20 22);       /* Deep Crimson Rose */
+  --phase-fertile: oklch(0.65 0.14 148);     /* Botanical Sage */
+  --phase-ovulation: oklch(0.76 0.16 82);    /* Golden Honey Nectar */
+  --phase-pms: oklch(0.68 0.15 48);          /* Sunlit Terracotta */
+  --phase-safe: oklch(0.65 0.11 245);        /* Dusky Cornflower */
+
+  /* Atmospheric Botanical Gradients */
+  --gradient-romance: linear-gradient(135deg, oklch(0.64 0.17 25), oklch(0.58 0.15 355));
+  --gradient-botanical: linear-gradient(135deg, oklch(0.65 0.14 148), oklch(0.76 0.16 82));
   --gradient-page:
-    radial-gradient(60% 45% at 12% 0%, oklch(0.92 0.07 350 / 75%), transparent 70%),
-    radial-gradient(55% 40% at 95% 8%, oklch(0.9 0.07 295 / 70%), transparent 70%),
-    radial-gradient(70% 50% at 50% 100%, oklch(0.94 0.05 200 / 55%), transparent 70%);
-  --shadow-soft: 0 18px 45px -22px oklch(0.55 0.14 340 / 45%);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+    radial-gradient(55% 45% at 8% -5%, oklch(0.94 0.05 45 / 55%), transparent 65%),
+    radial-gradient(50% 40% at 94% 4%, oklch(0.93 0.05 25 / 45%), transparent 65%),
+    radial-gradient(65% 55% at 50% 102%, oklch(0.95 0.03 145 / 40%), transparent 70%);
+
+  /* Soft Organic Depth with Subtle Blur & Offset */
+  --shadow-soft: 0 12px 36px -12px oklch(0.35 0.08 30 / 12%), 0 2px 8px -2px oklch(0.35 0.08 30 / 6%);
+  --shadow-elevated: 0 20px 48px -14px oklch(0.35 0.08 30 / 18%), 0 4px 14px -3px oklch(0.35 0.08 30 / 8%);
 }
 
 .dark {
-  --background: oklch(0.17 0.035 315);
-  --foreground: oklch(0.96 0.015 330);
-  --card: oklch(0.99 0.02 330 / 9%);
-  --card-foreground: oklch(0.96 0.015 330);
-  --popover: oklch(0.23 0.04 315);
-  --popover-foreground: oklch(0.96 0.015 330);
-  --primary: oklch(0.76 0.15 350);
-  --primary-foreground: oklch(0.19 0.04 330);
-  --secondary: oklch(0.3 0.05 300);
-  --secondary-foreground: oklch(0.95 0.015 330);
-  --muted: oklch(0.27 0.04 315);
-  --muted-foreground: oklch(0.76 0.03 330);
-  --accent: oklch(0.33 0.06 320);
-  --accent-foreground: oklch(0.96 0.015 330);
-  --destructive: oklch(0.68 0.19 20);
-  --destructive-foreground: oklch(0.98 0.01 340);
-  --border: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.7 0.13 345);
-  --phase-period: oklch(0.68 0.19 20);
-  --phase-fertile: oklch(0.74 0.14 155);
-  --phase-ovulation: oklch(0.82 0.14 85);
-  --phase-pms: oklch(0.78 0.15 55);
-  --phase-safe: oklch(0.74 0.12 250);
-  --gradient-romance: linear-gradient(135deg, oklch(0.62 0.16 350), oklch(0.55 0.14 305));
+  /* Deep Velvet Espresso Fig Canvas */
+  --background: oklch(0.16 0.032 345);
+  --foreground: oklch(0.96 0.012 60);
+
+  /* Smoky Velvet Plum Card Surfaces */
+  --card: oklch(0.22 0.038 340 / 78%);
+  --card-foreground: oklch(0.96 0.012 60);
+  --popover: oklch(0.22 0.038 340);
+  --popover-foreground: oklch(0.96 0.012 60);
+
+  /* Luminous Dusky Rose & Amber Accents */
+  --primary: oklch(0.72 0.16 28);
+  --primary-foreground: oklch(0.16 0.032 345);
+  --secondary: oklch(0.27 0.04 330);
+  --secondary-foreground: oklch(0.95 0.015 50);
+
+  --muted: oklch(0.25 0.03 345);
+  --muted-foreground: oklch(0.72 0.028 50);
+
+  --accent: oklch(0.29 0.05 335);
+  --accent-foreground: oklch(0.96 0.015 50);
+
+  --destructive: oklch(0.66 0.19 25);
+  --destructive-foreground: oklch(0.99 0.005 60);
+
+  --border: oklch(0.85 0.03 50 / 14%);
+  --input: oklch(0.85 0.03 50 / 16%);
+  --ring: oklch(0.74 0.15 28);
+
+  /* Luminous Dark-Mode Calibrated Phase Tokens */
+  --phase-period: oklch(0.68 0.19 22);
+  --phase-fertile: oklch(0.72 0.14 148);
+  --phase-ovulation: oklch(0.82 0.15 82);
+  --phase-pms: oklch(0.76 0.15 48);
+  --phase-safe: oklch(0.72 0.12 245);
+
+  --gradient-romance: linear-gradient(135deg, oklch(0.70 0.16 28), oklch(0.62 0.14 355));
+  --gradient-botanical: linear-gradient(135deg, oklch(0.70 0.14 148), oklch(0.80 0.15 82));
   --gradient-page:
-    radial-gradient(60% 45% at 12% 0%, oklch(0.42 0.09 350 / 55%), transparent 70%),
-    radial-gradient(55% 40% at 95% 8%, oklch(0.38 0.09 295 / 55%), transparent 70%),
-    radial-gradient(70% 50% at 50% 100%, oklch(0.35 0.07 220 / 45%), transparent 70%);
-  --shadow-soft: 0 18px 45px -22px oklch(0 0 0 / 65%);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+    radial-gradient(55% 45% at 8% -5%, oklch(0.32 0.07 345 / 45%), transparent 65%),
+    radial-gradient(50% 40% at 94% 4%, oklch(0.28 0.06 25 / 40%), transparent 65%),
+    radial-gradient(65% 55% at 50% 102%, oklch(0.26 0.05 145 / 35%), transparent 70%);
+
+  --shadow-soft: 0 14px 40px -14px oklch(0 0 0 / 55%), 0 2px 8px -2px oklch(0 0 0 / 30%);
+  --shadow-elevated: 0 22px 50px -16px oklch(0 0 0 / 70%), 0 4px 16px -3px oklch(0 0 0 / 40%);
 }
 
 @layer base {
@@ -165,33 +155,162 @@
     border-color: var(--color-border);
   }
 
+  /* Browser surface theming per craft-floor specification */
+  ::selection {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.6 0.05 35 / 25%);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.6 0.05 35 / 45%);
+  }
+
   body {
     background-color: var(--color-background);
     background-image: var(--gradient-page);
     background-repeat: no-repeat;
+    background-attachment: fixed;
     background-size: cover;
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    letter-spacing: -0.005em;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3 {
+  h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tabular numbers for clean data/counters */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
+/* Organic Editorial Utility Classes */
 @utility glass {
   background-color: var(--card);
   border: 1px solid var(--border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--shadow-soft);
   border-radius: var(--radius-2xl);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+@utility glass-elevated {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-elevated);
+  border-radius: var(--radius-3xl);
 }
 
 @utility gradient-romance {
   background-image: var(--gradient-romance);
+}
+
+@utility gradient-botanical {
+  background-image: var(--gradient-botanical);
+}
+
+@utility badge-phase {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  box-shadow: 0 4px 12px -3px oklch(0 0 0 / 25%);
+}
+
+/* ── Second Iteration Polish ─────────────────────────────────── */
+
+/* Page entrance fade-up */
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes pulseRing {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.63 0.17 25 / 40%); }
+  50% { box-shadow: 0 0 0 6px oklch(0.63 0.17 25 / 0%); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+/* Entrance animation for page sections */
+@utility animate-enter {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-fade {
+  animation: fadeIn 0.4s ease both;
+}
+
+/* Staggered entrance delays for grid children */
+@utility stagger-1 { animation-delay: 50ms; }
+@utility stagger-2 { animation-delay: 100ms; }
+@utility stagger-3 { animation-delay: 150ms; }
+@utility stagger-4 { animation-delay: 200ms; }
+@utility stagger-5 { animation-delay: 250ms; }
+@utility stagger-6 { animation-delay: 300ms; }
+
+/* Today ring pulse for calendar */
+@utility pulse-today {
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+/* Accessible focus-visible ring on all interactive elements */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: inherit;
+  }
+}
+
+/* Enhanced glass hover glow */
+@utility glass-hover-glow {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+/* Spring-loaded interactive press feedback */
+@utility press-spring {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+/* Warm shimmer loading skeleton */
+@utility skeleton-warm {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--accent) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-lg);
 }

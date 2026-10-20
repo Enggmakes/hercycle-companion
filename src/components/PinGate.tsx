@@ -26,25 +26,29 @@ export function PinGate({ children }: { children: ReactNode }) {
   if (!data.pin || unlocked) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="glass w-full max-w-sm p-8 text-center"
       >
-        <span className="mx-auto grid size-14 place-items-center rounded-3xl gradient-romance">
+        <span className="mx-auto grid size-14 place-items-center rounded-3xl gradient-romance shadow-md">
           <LockKeyhole className="size-6 text-primary-foreground" />
         </span>
-        <h1 className="mt-4 text-2xl font-semibold">Locked with love</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Enter your PIN to open HerCycle.
+        <h1 className="mt-5 font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Protected with Love
+        </h1>
+        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+          Enter your private passcode to access HerCycle.
         </p>
         <form
-          className="mt-6 space-y-3"
+          className="mt-6 space-y-3.5"
           onSubmit={(e) => {
             e.preventDefault();
-            if (value === data.pin) setUnlocked(true);
-            else {
+            if (value === data.pin) {
+              setUnlocked(true);
+            } else {
               setError(true);
               setValue("");
             }
@@ -60,12 +64,19 @@ export function PinGate({ children }: { children: ReactNode }) {
               setValue(e.target.value.replace(/\D/g, ""));
               setError(false);
             }}
-            className="text-center text-2xl tracking-[0.5em]"
+            className="rounded-2xl border border-border/80 bg-card/80 py-3 text-center font-display text-2xl tracking-[0.4em] focus:border-primary"
             placeholder="••••"
           />
-          {error && <p className="text-sm text-destructive">That PIN doesn't match.</p>}
-          <Button type="submit" className="w-full">
-            <Heart className="size-4" /> Unlock
+          {error && (
+            <p className="text-xs font-semibold text-destructive">
+              Passcode does not match. Please try again.
+            </p>
+          )}
+          <Button
+            type="submit"
+            className="w-full rounded-2xl gradient-romance text-primary-foreground shadow-sm py-2.5 font-semibold text-xs"
+          >
+            <Heart className="size-4 mr-1.5" /> Unlock Journal
           </Button>
         </form>
       </motion.div>
